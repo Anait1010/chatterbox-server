@@ -13,6 +13,7 @@ var Messages = {
   },
 
   update: function(messages, callback = ()=>{}) {
+    console.log("Messages dat inside update:",Messages._data );
     var length = Object.keys(Messages._data).length;
 
     for (let message of messages) {
@@ -32,5 +33,5 @@ var Messages = {
     message.roomname = message.roomname || '';
     return message;
   }
-  
+
 };

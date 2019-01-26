@@ -19,7 +19,7 @@ this file and include it in basic-server.js so that it actually works.
 const { parse } = require('querystring');
 
 var messageStorage = {};
-var nextMessageId=1;
+var nextObjectId=1;
 
 //var roomStorage = {};
 
@@ -70,7 +70,7 @@ var requestHandler = function(request, response) {
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
   //headers['Content-Type'] = 'text/plain';
-  headers['Content-Type'] = 'JSON';
+  headers['Content-Type'] = 'application/json';
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
@@ -90,7 +90,7 @@ var requestHandler = function(request, response) {
 
     if (request.method==='GET' && request.url.toLowerCase().startsWith('/classes/messages')) {
       var messages=[];
-      for (let i = nextMessageId - 1; i > 0 ; i --){
+      for (let i = nextObjectId - 1; i > 0 ; i --){
         messages.push(messageStorage[i]);
       }
       var responseBody=JSON.stringify({results:messages});
@@ -115,19 +115,18 @@ var requestHandler = function(request, response) {
 };
 
 var saveMessage = function(messageBody){
-  var messageId=nextMessageId;
+  var objectId=nextObjectId;
   var username=messageBody["username"];
   var newMessage = {
-  "messageId":messageId,
+  "objectId":objectId,
   "username":username,
   "text":messageBody["text"],
   "roomname":messageBody["roomname"],
   "createdAt": (new Date()).toISOString()
   }
 
-
-  messageStorage[messageId]=newMessage;
-  nextMessageId+=1;
+  messageStorage[objectId]=newMessage;
+  nextObjectId+=1;
   console.log("Messages on server are:", messageStorage);
   return newMessage;
 
