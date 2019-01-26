@@ -9,7 +9,7 @@ var FormView = {
   handleSubmit: function(event) {
     // Stop the browser from submitting the form
     event.preventDefault();
-    
+
 
     var message = {
       username: App.username,
@@ -18,6 +18,7 @@ var FormView = {
     };
 
     Parse.create(message, (data) => {
+      console.log("REceived response from post:", data);
       _.extend(message, data);
       Messages.add(message, MessagesView.render);
     });

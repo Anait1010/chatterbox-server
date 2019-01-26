@@ -23,9 +23,14 @@ var App = {
   fetch: function(callback = ()=>{}) {
     Parse.readAll((data) => {
 
+      console.log("Response from Get request:", data);
       // Don't bother to update if we have no messages
-      if (!data.results || !data.results.length) { return; }
-
+      if (!data.results || !data.results.length) {
+        console.log("Data.Results are:", data.results);
+        console.log("Typeof Data is:", typeof(data));
+        return;
+      }
+      console.log("Got results:", data.results);
       Rooms.update(data.results, RoomsView.render);
       Messages.update(data.results, MessagesView.render);
 

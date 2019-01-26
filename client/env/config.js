@@ -8,4 +8,4 @@
 }); */
 
 // Put your campus prefix here
-window.CAMPUS = 'RPT12';
+window.CAMPUS = 'RPT';

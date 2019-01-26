@@ -16,7 +16,10 @@ this file and include it in basic-server.js so that it actually works.
 // are on different domains, for instance, your chat client.
 //
 
-//var messageStorage = {};
+const { parse } = require('querystring');
+
+var messageStorage = {};
+var nextMessageId=1;
 
 //var roomStorage = {};
 
@@ -45,16 +48,17 @@ var requestHandler = function(request, response) {
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
   //console.log("Request Header looks like:", request.headers);
 
-  let body = [];
-  request.on('data', (chunk) => {
-    body.push(chunk);
-  }).on('end', () => {
-  body = Buffer.concat(body).toString();
-  // at this point, `body` has the entire request body stored in it as a string
-  });
+  /* if (request.method==='POST') {
+    let body = [];
+    request.on('data', (chunk) => {
+      body.push(chunk);
+    }).on('end', () => {
+    body = Buffer.concat(body).toString();
+    console.log("Request Body looks like:", body);
+    // at this point, `body` has the entire request body stored in it as a string
+    });
+  } */
 
-
-  console.log("Request Body looks like:", body);
   // The outgoing status.
   var statusCode = 200;
 
@@ -65,7 +69,8 @@ var requestHandler = function(request, response) {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'text/plain';
+  //headers['Content-Type'] = 'text/plain';
+  headers['Content-Type'] = 'JSON';
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
@@ -82,8 +87,52 @@ var requestHandler = function(request, response) {
   // if request method is Get and URl is classes/rooms then send room response
   // if request method is Post and URl is classes/messages then store the message in storage and send the success response
   // if request method is Get and URl is classes/rooms then store the message in storage and send the success response
-  response.end('Hello, World!');
+
+    if (request.method==='GET' && request.url.toLowerCase().startsWith('/classes/messages')) {
+      var messages=[];
+      for (let i = nextMessageId - 1; i > 0 ; i --){
+        messages.push(messageStorage[i]);
+      }
+      var responseBody=JSON.stringify({results:messages});
+      response.end(responseBody);
+      //response.end('Got results!');
+    } else if (request.method==='POST' && request.url.toLowerCase()==='/classes/messages') {
+      let body = [];
+      request.on('data', (chunk) => {
+        body.push(chunk);
+      }).on('end', () => {
+        body = Buffer.concat(body).toString();
+        let messageBody = JSON.parse(body);
+        console.log("typeof MessageBody is:", typeof(messageBody));
+        var message = saveMessage(messageBody);
+        var responseBody=JSON.stringify({objectId:message["messageId"], createdAt:message["createdAt"]});
+        response.end(responseBody);
+      });
+    } else {
+        response.end('Hello, World!');
+    }
+
 };
+
+var saveMessage = function(messageBody){
+  var messageId=nextMessageId;
+  var username=messageBody["username"];
+  var newMessage = {
+  "messageId":messageId,
+  "username":username,
+  "text":messageBody["text"],
+  "roomname":messageBody["roomname"],
+  "createdAt": (new Date()).toISOString()
+  }
+
+
+  messageStorage[messageId]=newMessage;
+  nextMessageId+=1;
+  console.log("Messages on server are:", messageStorage);
+  return newMessage;
+
+
+}
 
 
 
